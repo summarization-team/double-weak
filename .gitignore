@@ -172,3 +172,4 @@ cython_debug/
 
 # Repo-specific
 logs/
+outputs/
