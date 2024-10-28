@@ -1,0 +1,23 @@
+defaults:
+  - data: huggingface
+  - dataset: load_dataset
+  - pipeline: automatic-speech-recognition
+  - processor: from_pretrained
+  - _self_
+
+model_id: distil-whisper/distil-large-v3
+
+processor:
+  pretrained_model_name_or_path: ${model_id}
+
+model:
+  pretrained_model_name_or_path: ${model_id}
+
+pipeline:
+  model: ${model_id}
+
+hydra:
+  job:
+    name: distil-whisper
+  run:
+    dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
