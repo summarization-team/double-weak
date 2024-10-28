@@ -1,11 +1,18 @@
+# config/evaluate.yaml
 defaults:
   - data: huggingface
   - dataset: load_dataset
   - pipeline: automatic-speech-recognition
   - processor: from_pretrained
+  - model: from_pretrained
   - _self_
 
 model_id: distil-whisper/distil-large-v3
+
+dataset:
+  path: hf-internal-testing/librispeech_asr_dummy  # Specify the dataset you want to use
+  name: clean
+  split: validation
 
 processor:
   pretrained_model_name_or_path: ${model_id}
