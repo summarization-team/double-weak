@@ -17,4 +17,4 @@
 #SBATCH --output=logs/%x_%j.out # where STDOUT goes- %x is the job name above, and %j is the job ID, unique to each job
 #SBATCH --error=logs/%x_%j.err # where STDERR goes
 
-./scripts/eval_distil_whisper.sh
+./scripts/evaluate.sh
