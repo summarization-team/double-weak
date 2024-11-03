@@ -28,3 +28,5 @@ hydra:
     name: distil-whisper
   run:
     dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+
+transcriptions_fname: transcriptions.json
