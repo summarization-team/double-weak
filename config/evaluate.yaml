@@ -5,6 +5,7 @@ defaults:
   - pipeline: automatic-speech-recognition
   - processor: from_pretrained
   - model: from_pretrained
+  - metric: wer
   - _self_
 
 model_id: distil-whisper/distil-large-v3
@@ -23,10 +24,18 @@ model:
 pipeline:
   model: ${model_id}
 
+
+batch_size: 32
+
+transcriptions_fname: transcriptions
+
+actual_transcription_field_name: text
+predicted_transcription_field_name: transcriptions
+bias_field_name: chapter_id
+
 hydra:
   job:
     name: distil-whisper
   run:
     dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
 
-transcriptions_fname: transcriptions.json
