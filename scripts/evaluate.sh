@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /mmfs1/home/$USER/miniconda3/etc/profile.d/conda.sh
-conda activate /mmfs1/gscratch/clmbr/babylm24/envs/gpu-lm-training
+conda activate /mmfs1/gscratch/clmbr/babylm24/envs/gpu-double-weak
 
 # error message details
 export CUDA_LAUNCH_BLOCKING=1
