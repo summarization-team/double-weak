@@ -16,4 +16,4 @@ export HF_DATASETS_CACHE=../.cache/datasets
 
 
 # Build shell command
-python src/evaluate.py
+python src/analyze.py
