@@ -12,11 +12,11 @@ dependencies:
   - pytorch=2.*
   - pytorch-cuda=11.*
   - transformers=4.*
-  - accelerate
-  - sentencepiece=0.* # can omit if sentencepiece models (e.g. ALBERT, XLMRoberta, T5) are not needed
+  - accelerate=1.0.*
+  - sentencepiece=0.*  # can omit if sentencepiece models (e.g. ALBERT, XLMRoberta, T5) are not needed
   - hydra-core=1.3.*
   - strenum
   - wandb=0.*
   - pip:
-    - librosa=0.*
-    - soundfile=0.12*
+    - librosa==0.10.*
+    - soundfile==0.12.*
