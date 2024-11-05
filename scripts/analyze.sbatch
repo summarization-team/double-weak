@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=eval_distil_whisper
+#SBATCH --job-name=distil_whisper
 #SBATCH --mail-user=kharalds@uw.edu
 #SBATCH --mail-type=BEGIN,END
 #SBATCH --chdir=/mmfs1/gscratch/clmbr/kharalds/ling580/double-weak
@@ -17,4 +17,4 @@
 #SBATCH --output=logs/%x_%j.out # where STDOUT goes- %x is the job name above, and %j is the job ID, unique to each job
 #SBATCH --error=logs/%x_%j.err # where STDERR goes
 
-./scripts/evaluate.sh
+./scripts/analyze.sh
