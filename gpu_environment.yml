@@ -9,6 +9,10 @@ dependencies:
   - pip=23.*
   - black
   - mypy
+  - numpy
+  - scipy
+  - statsmodels
+  - matplotilb
   - pytorch=2.*
   - pytorch-cuda=11.*
   - transformers=4.*
