@@ -6,13 +6,13 @@ defaults:
   - processor: from_pretrained
   - model: from_pretrained
   - metric: wer
+  - stats: scipy/kruskal
   - _self_
 
 model_id: distil-whisper/distil-large-v3
 
 dataset:
   path: hf-internal-testing/librispeech_asr_dummy  # Specify the dataset you want to use
-  name: clean
   split: validation
 
 processor:

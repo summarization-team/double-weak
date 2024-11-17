@@ -20,6 +20,7 @@ For examples of how to run this script, please refer to the `README.md` file.
 import logging
 import os
 import sys
+import re
 
 import hydra
 from omegaconf import DictConfig, OmegaConf, open_dict
@@ -46,16 +47,35 @@ log = logging.getLogger(__name__)
 # Resolver to split a string x on a character y and return the (z-1)th element
 OmegaConf.register_new_resolver("split", lambda x, y, z: x.split(y)[z])
 
-def transcribe_batch(batch, asr_pipeline, transcription_field_name):
+
+def create_groups(dataset, group_column, metric_column):
+    group_scores = {}
+
+    groups = dataset.unique(group_column)
+
+    for group in groups:
+        dataset_filtered = dataset.filter(lambda x: x[group_column] == group)
+        dataset_filtered = dataset_filtered.filter(lambda x: x[metric_column] is not None)
+        group_scores[group] = dataset_filtered[metric_column]
+
+    return group_scores
+
+
+def transcribe_batch(
+        batch: dict, 
+        asr_pipeline, 
+        transcription_field_name: str
+        ) -> dict:
     """
     Transcribes a batch of audio samples using the ASR pipeline.
 
     Args:
         batch (dict): A batch of data containing audio samples.
         asr_pipeline (transformers.pipelines.Pipeline): The ASR pipeline for inference.
+        transcription_field_name (str): The key to store the transcribed text in the batch.
 
     Returns:
-        dict: The batch with an added 'transcription' field containing the transcribed text.
+        dict: The batch with an added field for the transcribed text.
     """
     # Get the list of audio samples from the batch
     audio_list = batch["audio"]
@@ -69,6 +89,66 @@ def transcribe_batch(batch, asr_pipeline, transcription_field_name):
     # Add the transcriptions to the batch
     batch[transcription_field_name] = texts
     return batch
+
+
+def clean_eval_text(text: str) -> str:
+    """
+    Cleans and normalizes evaluation text for processing.
+
+    This function performs the following steps:
+      1. Strips leading and trailing whitespace.
+      2. Converts the text to lowercase for case normalization.
+      3. Removes all punctuation by replacing it with an empty string.
+
+    Args:
+        text (str): The input text to be cleaned.
+
+    Returns:
+        str: The cleaned and normalized text.
+    """
+    text = text.strip()  # Remove leading and trailing whitespace
+    text = text.lower()  # Normalize case
+    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+    return text
+
+
+def compute_metric_per_example(
+        batch: dict,
+        metric,
+        reference_field_name: str,
+        transcription_field_name: str
+    ) -> dict:
+    """
+    Computes a metric for each example in a batch and appends the metric results to the batch.
+
+    This function evaluates model predictions against reference data using a specified metric.
+    It standardizes the text inputs and calculates metric scores for all examples in the batch.
+
+    Args:
+        batch (dict): A dictionary containing the batched data. Each key represents a field 
+                      (e.g., references, predictions) mapped to a list of values.
+        metric (datasets.Metric): A metric object from the `datasets` library used for evaluation.
+        reference_field_name (str): The key in the batch dictionary containing the reference text.
+        transcription_field_name (str): The key in the batch dictionary containing the predicted text.
+
+    Returns:
+        dict: The batch dictionary with an additional field containing the computed metric scores. 
+              The metric scores are replicated across all examples for consistency.
+    """
+    # Extract references and predictions from the batch
+    references = batch[reference_field_name]
+    transcriptions = batch[transcription_field_name]
+
+    # Standardize text inputs
+    references = [clean_eval_text(ref) for ref in references]
+    transcriptions = [clean_eval_text(trans) for trans in transcriptions]
+
+    # Compute the metric scores for the batch
+    metric_scores = metric.compute(references=references, predictions=transcriptions)
+
+    # Return a dictionary with all fields of the batch and the metric scores
+    return {**batch, metric.name: [metric_scores] * len(references)}
+
 
 @hydra.main(config_path="../config", config_name="evaluate", version_base=None)
 def evaluate(cfg: DictConfig) -> None:
@@ -143,16 +223,23 @@ def evaluate(cfg: DictConfig) -> None:
     # Evaluate transcriptions
     metric = load(cfg.metric.path)
     log.info(f"Metric loaded={metric.name}.")
+    ds = ds.remove_columns(["audio"])
+    ds = ds.map(
+        lambda batch: compute_metric_per_example(
+            batch, metric, cfg.actual_transcription_field_name, cfg.predicted_transcription_field_name),
+        batched=True,
+        batch_size=batch_size,
+    )
+    log.info("Evaluation completed.")
 
-    metric_score = metric.compute(
-        references=ds[cfg.actual_transcription_field_name],
-        predictions=ds[cfg.predicted_transcription_field_name],
-        )
-    log.info(f"Overall {metric.name} score={metric_score}.")
+    grouped_scores = create_groups(ds, cfg.bias_field_name, metric.name)
 
-    # TODO: Add error analysis / bias analysis
-    # TODO: instantiate via hydra
+    test_statistic, p_value  = hydra.utils.call(cfg.stats, *grouped_scores)
 
+    # Perform the significance test
+    # u_statistic, p_value = statistic(group1_wers, group2_wers, alternative='two-sided')
+    print(f"Test Statistic: {test_statistic}")
+    print(f"P-value: {p_value}")
 
 
 if __name__ == "__main__":
