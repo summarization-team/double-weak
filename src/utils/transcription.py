@@ -1,5 +1,5 @@
 """
-Moduel for transcription of utilities.
+Module for transcription of utilities.
 """
 
 def transcribe_batch(
