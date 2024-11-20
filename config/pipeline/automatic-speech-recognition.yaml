@@ -2,5 +2,6 @@ defaults:
   - _self_
 _target_: transformers.pipeline
 task: "automatic-speech-recognition"
-model: ???
 max_new_tokens: 128
+return_timestamps: True
+model: ???
