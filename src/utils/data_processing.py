@@ -2,8 +2,7 @@
 Module for processing data related to transcription and statistical analysis.
 
 """
-
-import re
+import os
 import numpy as np
 import json
 
@@ -38,64 +37,6 @@ def create_groups(
     return group_scores
 
 
-def clean_eval_text(text: str) -> str:
-    """
-    Cleans and normalizes evaluation text for processing.
-
-    This function performs the following steps:
-      1. Strips leading and trailing whitespace.
-      2. Converts the text to lowercase for case normalization.
-      3. Removes all punctuation by replacing it with an empty string.
-
-    Args:
-        text (str): The input text to be cleaned.
-
-    Returns:
-        str: The cleaned and normalized text.
-    """
-    text = text.strip()  # Remove leading and trailing whitespace
-    text = text.lower()  # Normalize case
-    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    return text
-
-
-def compute_metric_per_example(
-        batch: dict,
-        metric,
-        reference_field_name: str,
-        transcription_field_name: str
-    ) -> dict:
-    """
-    Computes a metric for each example in a batch and appends the metric results to the batch.
-
-    This function evaluates model predictions against reference data using a specified metric.
-    It standardizes the text inputs and calculates metric scores for all examples in the batch.
-
-    Args:
-        batch (dict): A dictionary containing the batched data. Each key represents a field 
-                      (e.g., references, predictions) mapped to a list of values.
-        metric (datasets.Metric): A metric object from the `datasets` library used for evaluation.
-        reference_field_name (str): The key in the batch dictionary containing the reference text.
-        transcription_field_name (str): The key in the batch dictionary containing the predicted text.
-
-    Returns:
-        dict: The batch dictionary with an additional field containing the computed metric scores. 
-              The metric scores are replicated across all examples for consistency.
-    """
-    # Extract references and predictions from the batch
-    references = batch[reference_field_name]
-    transcriptions = batch[transcription_field_name]
-
-    # Standardize text inputs
-    references = [clean_eval_text(ref) for ref in references]
-    transcriptions = [clean_eval_text(trans) for trans in transcriptions]
-
-    # Compute the metric scores for the batch
-    metric_scores = metric.compute(references=references, predictions=transcriptions)
-
-    # Return a dictionary with all fields of the batch and the metric scores
-    return {**batch, metric.name: [metric_scores] * len(references)}
-
 class NpEncoder(json.JSONEncoder):
     """
     Custom JSON Encoder to handle numpy data types.
@@ -110,3 +51,22 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         else:
             return super(NpEncoder, self).default(obj)
+        
+def save_results_to_json(results_data, output_dir, cfg):
+    """Save results data to a JSON file.
+
+    Args:
+        results_data (dict): The data to be saved.
+        output_dir (str): Directory where the results file will be stored.
+        cfg (dict): Configuration dictionary containing optional filename.
+        encoder_class (type, optional): JSON encoder class for custom serialization. Defaults to None.
+
+    Returns:
+        str: Path to the saved results file.
+    """
+    results_file = os.path.join(output_dir, cfg.get("results_fname", "results")) + ".json"
+
+    with open(results_file, "w") as f:
+        json.dump(results_data, f, indent=4, cls=NpEncoder)
+
+    return results_file
