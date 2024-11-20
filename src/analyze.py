@@ -17,13 +17,12 @@ For examples of how to run this script, please refer to the `README.md` file.
 
 import logging
 import os
-import sys
-import re
 
 import hydra
 from omegaconf import DictConfig, OmegaConf, open_dict
 
 import torch
+
 from transformers import (
     AutoModelForSpeechSeq2Seq,
     AutoProcessor,
@@ -41,127 +40,19 @@ from evaluate import load
 
 from itertools import islice
 
+from utils import (
+    create_groups, 
+    transcribe_batch, 
+    compute_metric_per_example, 
+    compute_agg_statistics,
+    save_results_to_json
+)
+
+
 log = logging.getLogger(__name__)
 
 # Resolver to split a string x on a character y and return the (z-1)th element
 OmegaConf.register_new_resolver("split", lambda x, y, z: x.split(y)[z])
-
-
-def create_groups(
-        dataset: Dataset,
-        group_column: str, 
-        metric_column: str,
-        ) -> dict:
-    """
-    Groups data by a specified column and computes scores for a metric column.
-
-    Args:
-        dataset (datasets.Dataset): The dataset to process, expected to be a Hugging Face Dataset object.
-        group_column (str): The name of the column to group by.
-        metric_column (str): The name of the column containing the metric to compute scores for.
-
-    Returns:
-        dict: A dictionary where keys are unique group values and values are lists of metric scores for each group.
-    """    
-    group_scores = {}
-
-    groups = dataset.unique(group_column)
-
-    for group in groups:
-        dataset_filtered = dataset.filter(lambda x: x[group_column] == group)
-        dataset_filtered = dataset_filtered.filter(lambda x: x[metric_column] is not None)
-        group_scores[group] = dataset_filtered[metric_column]
-
-    return group_scores
-
-
-def transcribe_batch(
-        batch: dict, 
-        asr_pipeline, 
-        transcription_field_name: str
-        ) -> dict:
-    """
-    Transcribes a batch of audio samples using the ASR pipeline.
-
-    Args:
-        batch (dict): A batch of data containing audio samples.
-        asr_pipeline (transformers.pipelines.Pipeline): The ASR pipeline for inference.
-        transcription_field_name (str): The key to store the transcribed text in the batch.
-
-    Returns:
-        dict: The batch with an added field for the transcribed text.
-    """
-    # Get the list of audio samples from the batch
-    audio_list = batch["audio"]
-
-    # Perform inference using the pipeline
-    transcriptions = asr_pipeline(audio_list)
-
-    # Extract the transcription text
-    texts = [item["text"] for item in transcriptions]
-
-    # Add the transcriptions to the batch
-    batch[transcription_field_name] = texts
-    return batch
-
-
-def clean_eval_text(text: str) -> str:
-    """
-    Cleans and normalizes evaluation text for processing.
-
-    This function performs the following steps:
-      1. Strips leading and trailing whitespace.
-      2. Converts the text to lowercase for case normalization.
-      3. Removes all punctuation by replacing it with an empty string.
-
-    Args:
-        text (str): The input text to be cleaned.
-
-    Returns:
-        str: The cleaned and normalized text.
-    """
-    text = text.strip()  # Remove leading and trailing whitespace
-    text = text.lower()  # Normalize case
-    text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
-    return text
-
-
-def compute_metric_per_example(
-        batch: dict,
-        metric,
-        reference_field_name: str,
-        transcription_field_name: str
-    ) -> dict:
-    """
-    Computes a metric for each example in a batch and appends the metric results to the batch.
-
-    This function evaluates model predictions against reference data using a specified metric.
-    It standardizes the text inputs and calculates metric scores for all examples in the batch.
-
-    Args:
-        batch (dict): A dictionary containing the batched data. Each key represents a field 
-                      (e.g., references, predictions) mapped to a list of values.
-        metric (datasets.Metric): A metric object from the `datasets` library used for evaluation.
-        reference_field_name (str): The key in the batch dictionary containing the reference text.
-        transcription_field_name (str): The key in the batch dictionary containing the predicted text.
-
-    Returns:
-        dict: The batch dictionary with an additional field containing the computed metric scores. 
-              The metric scores are replicated across all examples for consistency.
-    """
-    # Extract references and predictions from the batch
-    references = batch[reference_field_name]
-    transcriptions = batch[transcription_field_name]
-
-    # Standardize text inputs
-    references = [clean_eval_text(ref) for ref in references]
-    transcriptions = [clean_eval_text(trans) for trans in transcriptions]
-
-    # Compute the metric scores for the batch
-    metric_scores = metric.compute(references=references, predictions=transcriptions)
-
-    # Return a dictionary with all fields of the batch and the metric scores
-    return {**batch, metric.name: [metric_scores] * len(references)}
 
 
 @hydra.main(config_path="../config", config_name="analyze", version_base=None)
@@ -255,6 +146,27 @@ def analyze(cfg: DictConfig) -> None:
     # Perform the significance test
     log.info(f"Test Statistic: {test_statistic}; P-value: {p_value}")
 
+    # Calculate aggreate descriptive statistics for each group and overall
+    agg_statistics = compute_agg_statistics(grouped_scores)
+
+    # Prep results data
+    results_data = {
+        "grouped_scores": grouped_scores,
+        "agg_statistics": agg_statistics,
+        "test_statistic": test_statistic,
+        "p_value": p_value,
+    }
+
+    # Write the output data to a JSON file
+    save_results_to_json(results_data, output_dir, cfg)
+
+    # results_file = os.path.join(output_dir, cfg.get("results_fname", "results"))
+    # results_file += ".json"
+
+    # with open(results_file, "w") as f:
+    #     json.dump(results_data, f, indent=4, cls=NpEncoder)
+    
+    log.info(f"Results saved to {output_dir}.")
 
 if __name__ == "__main__":
     analyze()
