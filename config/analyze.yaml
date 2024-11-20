@@ -26,6 +26,7 @@ pipeline:
 
 
 batch_size: 32
+sampling_rate: 16000
 
 transcriptions_fname: transcriptions
 

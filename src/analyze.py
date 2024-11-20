@@ -10,8 +10,6 @@ The script performs the following steps:
 - Loads the dataset specified in the configuration.
 - Runs inference on the dataset efficiently using batch processing.
 - Logs the transcription results.
-- TODO: add multi-dataset support
-- TODO: add bias evaluation modules
 
 For examples of how to run this script, please refer to the `README.md` file.
 
@@ -166,8 +164,8 @@ def compute_metric_per_example(
     return {**batch, metric.name: [metric_scores] * len(references)}
 
 
-@hydra.main(config_path="../config", config_name="evaluate", version_base=None)
-def evaluate(cfg: DictConfig) -> None:
+@hydra.main(config_path="../config", config_name="analyze", version_base=None)
+def analyze(cfg: DictConfig) -> None:
     """
     Evaluates a speech recognition model using the configurations provided.
 
@@ -248,15 +246,15 @@ def evaluate(cfg: DictConfig) -> None:
     )
     log.info("Evaluation completed.")
 
+    # Group scores based on the tested group
     grouped_scores = create_groups(ds, cfg.bias_field_name, metric.name)
 
+    # Call statistical test
     test_statistic, p_value  = hydra.utils.call(cfg.stats, *grouped_scores)
 
     # Perform the significance test
-    # u_statistic, p_value = statistic(group1_wers, group2_wers, alternative='two-sided')
-    print(f"Test Statistic: {test_statistic}")
-    print(f"P-value: {p_value}")
+    log.info(f"Test Statistic: {test_statistic}; P-value: {p_value}")
 
 
 if __name__ == "__main__":
-    evaluate()
+    analyze()
