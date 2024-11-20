@@ -35,6 +35,7 @@ from transformers import (
 from datasets import (
     load_dataset,
     DatasetDict,
+    Dataset,
     Audio
 )
 
@@ -48,7 +49,22 @@ log = logging.getLogger(__name__)
 OmegaConf.register_new_resolver("split", lambda x, y, z: x.split(y)[z])
 
 
-def create_groups(dataset, group_column, metric_column):
+def create_groups(
+        dataset: Dataset,
+        group_column: str, 
+        metric_column: str,
+        ) -> dict:
+    """
+    Groups data by a specified column and computes scores for a metric column.
+
+    Args:
+        dataset (datasets.Dataset): The dataset to process, expected to be a Hugging Face Dataset object.
+        group_column (str): The name of the column to group by.
+        metric_column (str): The name of the column containing the metric to compute scores for.
+
+    Returns:
+        dict: A dictionary where keys are unique group values and values are lists of metric scores for each group.
+    """    
     group_scores = {}
 
     groups = dataset.unique(group_column)
