@@ -11,9 +11,12 @@ defaults:
 
 model_id: distil-whisper/distil-large-v3
 
+batch_size: 32
+sampling_rate: 16000
+
 dataset:
-  path: hf-internal-testing/librispeech_asr_dummy  # Specify the dataset you want to use
-  split: validation
+  path: edinburghcstr/edacc  # Specify the dataset you want to use
+  split: "validation[:10%]+validation[-10%:]"
 
 processor:
   pretrained_model_name_or_path: ${model_id}
@@ -24,15 +27,11 @@ model:
 pipeline:
   model: ${model_id}
 
-
-batch_size: 32
-sampling_rate: 16000
-
 transcriptions_fname: transcriptions
-
+results_fname: results
 actual_transcription_field_name: text
 predicted_transcription_field_name: transcriptions
-bias_field_name: chapter_id
+bias_field_name: gender
 
 hydra:
   job:
