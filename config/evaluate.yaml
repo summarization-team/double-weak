@@ -8,7 +8,7 @@ defaults:
   - metric: wer
   - _self_
 
-model_id: distil-whisper/distil-large-v3
+model_id: openai/whisper-tiny.en #distil-whisper/distil-large-v3
 
 dataset:
   path: hf-internal-testing/librispeech_asr_dummy  # Specify the dataset you want to use
