@@ -74,7 +74,6 @@ def analyze(cfg: DictConfig) -> None:
     """
     log.info(f"Config:\n{OmegaConf.to_yaml(cfg)}")
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
     log.info(f"Device: {device}")
 
     # Instantiate the model
@@ -93,7 +92,6 @@ def analyze(cfg: DictConfig) -> None:
         model=model,
         tokenizer=processor.tokenizer,
         feature_extractor=processor.feature_extractor,
-        torch_dtype=torch_dtype,
         device=device,
         _convert_="object",
     )

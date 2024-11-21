@@ -1,4 +1,4 @@
-name: gpu-double-weak
+name: double-weak-gpu
 channels:
   - defaults
 dependencies:

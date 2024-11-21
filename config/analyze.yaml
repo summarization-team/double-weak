@@ -9,7 +9,7 @@ defaults:
   - stats: scipy/kruskal
   - _self_
 
-model_id: distil-whisper/distil-large-v3
+model_id: openai/whisper-tiny.en #distil-whisper/distil-large-v3
 
 batch_size: 32
 sampling_rate: 16000
