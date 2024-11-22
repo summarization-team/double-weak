@@ -10,6 +10,8 @@ The script performs the following steps:
 - Loads the dataset specified in the configuration.
 - Runs inference on the dataset efficiently using batch processing.
 - Logs the transcription results.
+- Calculates an evaluation metric (e.g., WER) for each utterance / test instance
+- Calculates a statistical test for each eval metric given a specified group
 
 For examples of how to run this script, please refer to the `README.md` file.
 
@@ -156,14 +158,7 @@ def analyze(cfg: DictConfig) -> None:
     }
 
     # Write the output data to a JSON file
-    save_results_to_json(results_data, output_dir, cfg)
-
-    # results_file = os.path.join(output_dir, cfg.get("results_fname", "results"))
-    # results_file += ".json"
-
-    # with open(results_file, "w") as f:
-    #     json.dump(results_data, f, indent=4, cls=NpEncoder)
-    
+    save_results_to_json(results_data, output_dir, cfg)    
     log.info(f"Results saved to {output_dir}.")
 
 if __name__ == "__main__":
