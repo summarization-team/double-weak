@@ -1,19 +1,27 @@
-# config/evaluate.yaml
 defaults:
-  - data: huggingface
   - dataset: load_dataset
   - pipeline: automatic-speech-recognition
   - processor: from_pretrained
   - model: from_pretrained
   - metric: wer
+  - stats: scipy/kruskal
   - _self_
 
 model_id: openai/whisper-tiny.en #distil-whisper/distil-large-v3
 
+batch_size: 32
+sampling_rate: 16000
+
 dataset:
-  path: hf-internal-testing/librispeech_asr_dummy  # Specify the dataset you want to use
-  name: clean
-  split: validation
+  path: edinburghcstr/edacc
+  split: "validation[:1%]+validation[-1%:]" # Use small percentage (1% from ehead and tail) of dataset for testing
+
+# This could be made more elegant, but it works for now:
+bias_field_name: gender
+transcriptions_fname: transcriptions
+results_fname: results
+actual_transcription_field_name: text
+predicted_transcription_field_name: transcriptions
 
 processor:
   pretrained_model_name_or_path: ${model_id}
@@ -24,18 +32,9 @@ model:
 pipeline:
   model: ${model_id}
 
-
-batch_size: 32
-
-transcriptions_fname: transcriptions
-
-actual_transcription_field_name: text
-predicted_transcription_field_name: transcriptions
-bias_field_name: chapter_id
-
 hydra:
   job:
-    name: distil-whisper
+    name: transcr
   run:
     dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
 

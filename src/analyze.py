@@ -10,8 +10,8 @@ The script performs the following steps:
 - Loads the dataset specified in the configuration.
 - Runs inference on the dataset efficiently using batch processing.
 - Logs the transcription results.
-- TODO: add multi-dataset support
-- TODO: add bias evaluation modules
+- Calculates an evaluation metric (e.g., WER) for each utterance / test instance
+- Calculates a statistical test for each eval metric given a specified group
 
 For examples of how to run this script, please refer to the `README.md` file.
 
@@ -19,12 +19,12 @@ For examples of how to run this script, please refer to the `README.md` file.
 
 import logging
 import os
-import sys
 
 import hydra
 from omegaconf import DictConfig, OmegaConf, open_dict
 
 import torch
+
 from transformers import (
     AutoModelForSpeechSeq2Seq,
     AutoProcessor,
@@ -34,6 +34,7 @@ from transformers import (
 from datasets import (
     load_dataset,
     DatasetDict,
+    Dataset,
     Audio
 )
 
@@ -41,37 +42,23 @@ from evaluate import load
 
 from itertools import islice
 
+from utils import (
+    create_groups, 
+    transcribe_batch, 
+    compute_metric_per_example, 
+    compute_agg_statistics,
+    save_results_to_json
+)
+
+
 log = logging.getLogger(__name__)
 
 # Resolver to split a string x on a character y and return the (z-1)th element
 OmegaConf.register_new_resolver("split", lambda x, y, z: x.split(y)[z])
 
-def transcribe_batch(batch, asr_pipeline, transcription_field_name):
-    """
-    Transcribes a batch of audio samples using the ASR pipeline.
 
-    Args:
-        batch (dict): A batch of data containing audio samples.
-        asr_pipeline (transformers.pipelines.Pipeline): The ASR pipeline for inference.
-
-    Returns:
-        dict: The batch with an added 'transcription' field containing the transcribed text.
-    """
-    # Get the list of audio samples from the batch
-    audio_list = batch["audio"]
-
-    # Perform inference using the pipeline
-    transcriptions = asr_pipeline(audio_list)
-
-    # Extract the transcription text
-    texts = [item["text"] for item in transcriptions]
-
-    # Add the transcriptions to the batch
-    batch[transcription_field_name] = texts
-    return batch
-
-@hydra.main(config_path="../config", config_name="evaluate", version_base=None)
-def evaluate(cfg: DictConfig) -> None:
+@hydra.main(config_path="../config", config_name="analyze", version_base=None)
+def analyze(cfg: DictConfig) -> None:
     """
     Evaluates a speech recognition model using the configurations provided.
 
@@ -141,17 +128,38 @@ def evaluate(cfg: DictConfig) -> None:
     # Evaluate transcriptions
     metric = load(cfg.metric.path)
     log.info(f"Metric loaded={metric.name}.")
+    ds = ds.remove_columns(["audio"])
+    ds = ds.map(
+        lambda batch: compute_metric_per_example(
+            batch, metric, cfg.actual_transcription_field_name, cfg.predicted_transcription_field_name),
+        batched=True,
+        batch_size=batch_size,
+    )
+    log.info("Evaluation completed.")
 
-    metric_score = metric.compute(
-        references=ds[cfg.actual_transcription_field_name],
-        predictions=ds[cfg.predicted_transcription_field_name],
-        )
-    log.info(f"Overall {metric.name} score={metric_score}.")
+    # Group scores based on the tested group
+    grouped_scores = create_groups(ds, cfg.bias_field_name, metric.name)
 
-    # TODO: Add error analysis / bias analysis
-    # TODO: instantiate via hydra
+    # Call statistical test
+    test_statistic, p_value  = hydra.utils.call(cfg.stats, *grouped_scores)
 
+    # Perform the significance test
+    log.info(f"Test Statistic: {test_statistic}; P-value: {p_value}")
 
+    # Calculate aggreate descriptive statistics for each group and overall
+    agg_statistics = compute_agg_statistics(grouped_scores)
+
+    # Prep results data
+    results_data = {
+        "grouped_scores": grouped_scores,
+        "agg_statistics": agg_statistics,
+        "test_statistic": test_statistic,
+        "p_value": p_value,
+    }
+
+    # Write the output data to a JSON file
+    save_results_to_json(results_data, output_dir, cfg)    
+    log.info(f"Results saved to {output_dir}.")
 
 if __name__ == "__main__":
-    evaluate()
+    analyze()
