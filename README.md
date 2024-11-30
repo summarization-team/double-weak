@@ -127,6 +127,10 @@ Defines the `transcribe_batch` function for transcribing a batch of audio sample
 - `gpu_environment.yml`: Conda environment file for GPU support.
 - `cpu_environment.yml`: Conda environment file for CPU-only support.
 
+## Citations
+- Lotto, A. J., & Holt, L. L. (2016). Speech perception: The view from the auditory system. In G. Hickok & S. L. Small (Eds.), Neurobiology of Language (pp. 179-188). Academic Press.
+- Nearey, T. M. (1997). Speech perception as pattern recognition. The Journal of the Acoustical Society of America, 101(6), 3241-3254.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
