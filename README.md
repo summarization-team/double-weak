@@ -2,12 +2,14 @@
 A system for evaluating biases in Automatic Speech Recognition (ASR) tools
 
 ## Project Overview
-This project aims to identify and measure potential biases in ASR systems. ASR technologies have become increasingly prevalent in our daily lives, from virtual assistants to transcription services. However, these systems may exhibit performance disparities across different demographic groups, accents, or speech patterns.
+This project aims to identify and measure potential biases in ASR systems. ASR technologies have become increasingly prevalent in our daily lives, from virtual assistants to transcription services. However, these systems may exhibit performance disparities across different demographic groups, accents, or speech patterns ([Qian et al., 2017](https://doi.org/10.21437/Interspeech.2017-250), [Tatman & Kasten, 2017](https://doi.org/10.21437/Interspeech.2017-1746), [Palanica et al., 2019](https://doi.org/10.1038/s41746-019-0133-x), [Koenecke et al., 2020](https://doi.org/10.1073/pnas.1915768117), [Wu et al., 2020](https://doi.org/10.1145/3379503.3403563), [Feng et al., 2021](https://arxiv.org/abs/2103.15122))
+.
 
 ### Why This Matters
-- **Fairness**: ASR systems should provide consistent performance across all user groups.
+- **Fairness**: ASR systems should provide consistent performance across all user groups .
 - **Accessibility**: Identify potential barriers for users with different accents or speech patterns.
 - **Quality Assurance**: Help developers understand and address bias in their ASR models.
+
 
 ## Components
 - **Bias Evaluation**: Measures performance differences across specified categories.
