@@ -127,9 +127,25 @@ Defines the `transcribe_batch` function for transcribing a batch of audio sample
 - `gpu_environment.yml`: Conda environment file for GPU support.
 - `cpu_environment.yml`: Conda environment file for CPU-only support.
 
-## Citations
-- Lotto, A. J., & Holt, L. L. (2016). Speech perception: The view from the auditory system. In G. Hickok & S. L. Small (Eds.), Neurobiology of Language (pp. 179-188). Academic Press.
-- Nearey, T. M. (1997). Speech perception as pattern recognition. The Journal of the Acoustical Society of America, 101(6), 3241-3254.
+## Relevant Literature
+
+### Bias in ASR
+- Feng, S., Kudina, O., & Halpern, B. M. (2021). Quantifying bias in automatic speech recognition. *arXiv preprint arXiv:2103.15122*. https://arxiv.org/abs/2103.15122  
+- Koenecke, A., Nam, A., Lake, E., Nudell, J., Quartey, M., Mengesha, Z., & Goel, S. (2020). Racial disparities in automated speech recognition. *Proceedings of the National Academy of Sciences, 117*(14), 7684–7689. https://doi.org/10.1073/pnas.1915768117  
+- Palanica, A., Thommandram, A., Lee, A., & Li, M. (2019). Do you understand the words that are comin' outta my mouth? Voice assistant comprehension of medication names. *npj Digital Medicine, 2*, 55. https://doi.org/10.1038/s41746-019-0133-x  
+- Qian, Y., Evanini, K., Wang, X., Lee, C. M., & Mulholland, M. (2017, August). Bidirectional LSTM-RNN for improving automated assessment of non-native children's speech. In *INTERSPEECH 2017: Proceedings of the 18th Annual Conference of the International Speech Communication Association* (pp. 1417–1421).  
+- Tatman, R., & Kasten, C. (2017). Effects of talker dialect, gender, and race on accuracy of Bing Speech and YouTube automatic captions. *Proceedings of INTERSPEECH 2017: Proceedings of the 18th Annual Conference of the International Speech Communication Association*, 934–938. https://doi.org/10.21437/Interspeech.2017-1746  
+- Wu, Y., Rough, D., Bleakley, A., Edwards, J., Cooney, O., Doyle, P. R., Clark, L., & Cowan, B. R. (2020). See what I’m saying? Comparing intelligent personal assistant use for native and non-native language speakers. In *Proceedings of the 22nd International Conference on Human-Computer Interaction with Mobile Devices and Services (MobileHCI '20)* (Article 34, pp. 1–9). Association for Computing Machinery. https://doi.org/10.1145/3379503.3403563  
+
+
+### Bias in Human Perception
+- Abrahamsson, N., & Hyltenstam, K. (2009). Age of onset and nativelikeness in a second language: Listener perception versus linguistic scrutiny. *Language Learning, 59*(2), 249–306. https://doi.org/10.1111/j.1467-9922.2009.00507.x  
+- Becker, K. (2014). The social motivations of reversal: Raised BOUGHT in New York City English. *Language in Society, 43*(4), 395–420. https://www.jstor.org/stable/43904579  
+- Johnson, K., Strand, E. A., & D'Imperio, M. (1999). Auditory–visual integration of talker gender in vowel perception. *Journal of Phonetics, 27*(4), 359–384. https://doi.org/10.1006/jpho.1999.0100  
+- Lotto, A. J., & Holt, L. L. (2016). Speech perception: The view from the auditory system. In G. Hickok & S. L. Small (Eds.), *Neurobiology of Language* (pp. 179–188). Academic Press.  
+- Munson, B. (2007). The acoustic correlates of perceived masculinity, perceived femininity, and perceived sexual orientation. *Language and Speech, 50*(Pt 1), 125–142. https://doi.org/10.1177/00238309070500010601  
+- Nearey, T. M. (1997). Speech perception as pattern recognition. *The Journal of the Acoustical Society of America, 101*(6), 3241–3254.  
+
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
