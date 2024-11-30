@@ -10,6 +10,12 @@ This project aims to identify and measure potential biases in ASR systems. ASR t
 - **Accessibility**: Identify potential barriers for users with different accents or speech patterns.
 - **Quality Assurance**: Help developers understand and address bias in their ASR models.
 
+### How the System Works
+`double-weak` is uses `hydra` configuration files to make it easy to switch out datasets, models, evaluation metrics, bias categories, and statistical tests. These components are customizable and instantiable using `hydra` configurations, meaning that no code changes should be required to expand beyond the base architecture. The base architecture supports the following, though most can be altered via `hydra` config:
+-  Evaluating models based on their Word Error Rate ("WER")
+-  Testing of categorical variable biases (e.g., accent, gender, race, etc.) only, as opposed to continuous variable biases
+-  Use of HuggingFace datasets. You can load any HuggingFace dataset. Data must be in the format of a HuggingFace datsaset, regardless of whether it is hosted by HuggingFace or converted from another.
+-  Statistical testing with the [Kruskal-Wallis H-test](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.kruskal.html). You may use add configurations for any _appropriate_ statistical test.
 
 ## Components
 - **Bias Evaluation**: Measures performance differences across specified categories.
