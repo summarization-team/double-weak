@@ -83,8 +83,8 @@ The `analyze.py` script is the core of the bias evaluation system. This script e
 
 ### Metrics
 The script computes several key metrics to evaluate bias:
-- **Word Error Rate (WER)**: Measures the percentage of words that were incorrectly transcribed.
-- **Statistical Tests**: Uses statistical tests like the Kruskal-Wallis H-test and Mann-Whitney U test to identify significant differences in performance across different categories.
+- **Word Error Rate (WER)**: Measures the percentage of words that were incorrectly transcribed. This can be changed via configuration.
+- **Statistical Tests**: Uses statistical tests like the Kruskal-Wallis H-test and Mann-Whitney U test to identify significant differences in performance across different categories. This can be changed via configuration.
 
 ### Model Configuration
 The project uses a pretrained ASR model from HuggingFace by default. The model configuration is specified in `config/model/from_pretrained.yaml`. 
