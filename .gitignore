@@ -170,6 +170,9 @@ cython_debug/
 *.model
 *.pkl
 
+# MacOS
+*.DS_Store
+
 # Repo-specific
 logs/
 outputs/
