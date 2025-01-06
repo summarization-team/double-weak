@@ -1,5 +1,6 @@
-name: double-weak-gpu
+name: double-weak-mps
 channels:
+  - pytorch
   - defaults
 dependencies:
   - python=3.10.*
@@ -7,8 +8,7 @@ dependencies:
   - pip:
       - black
       - mypy
-      - torch==2.*  # PyTorch
-      - --extra-index-url https://download.pytorch.org/whl/cu118
+      - torch==2.*
       - transformers==4.*
       - accelerate==1.0.*
       - evaluate==0.4.*

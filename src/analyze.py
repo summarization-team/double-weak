@@ -57,6 +57,15 @@ log = logging.getLogger(__name__)
 OmegaConf.register_new_resolver("split", lambda x, y, z: x.split(y)[z])
 
 
+def get_device():
+    if torch.cuda.is_available():
+        return "cuda:0"
+    elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"
+    else:
+        return "cpu"
+
+
 @hydra.main(config_path="../config", config_name="analyze", version_base=None)
 def analyze(cfg: DictConfig) -> None:
     """
@@ -75,7 +84,7 @@ def analyze(cfg: DictConfig) -> None:
 
     """
     log.info(f"Config:\n{OmegaConf.to_yaml(cfg)}")
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = get_device()
     log.info(f"Device: {device}")
 
     # Instantiate the model
